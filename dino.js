@@ -5,20 +5,21 @@ let boardWidth = 980;
 let boardHeight = 600;
 let context;
 
+// dinoの変数から直していこうか。。。
 //dino
-let dinoWidth = 88;
-let dinoHeight = 94;
-let dinoX = 20;
-let dinoY = boardHeight - dinoHeight; // 600 - 94
-let dinoImg;
+let playerWidth = 88;
+let playerHeight = 94;
+let playerX = 20;
+let playerY = boardHeight - playerHeight; // 600 - 94
+let playerImg;
 
 // dinoのobjectをここで作っているのね。
 // 実際に、今dinoがどこにいるかの情報をここで持っている。
-let dino = {
-  x: dinoX,
-  y: dinoY,
-  width: dinoWidth,
-  height: dinoHeight,
+let player = {
+  x: playerX,
+  y: playerY,
+  width: playerWidth,
+  height: playerHeight,
 };
 
 //cactus
@@ -31,11 +32,11 @@ let jumpTicket = 2;
 // 地面についていたら、つまり初期のdinoYの一にいる場合は常にjumpTicketが2の状態になる感じ。一回jumpするごとにtikcetを切る。
 
 // さぼてんの横の大きさをここで定義している。
-let cactus1Width = 80;
+let cactus1Width = 70;
 let cactus2Width = 160;
 let cactus3Width = 102;
 
-let cactusHeight = 90;
+let cactusHeight = 80;
 //最初、サボテンがどの位置で始めるかをここで定義しているのね。
 let cactusX = 980;
 let cactusY = boardHeight - cactusHeight;
@@ -47,7 +48,7 @@ let cactus3Img;
 //physics
 let velocityX = -8; //cactus moving left speed // これを
 let velocityY = 0;
-let gravity = 0.3;
+let gravity = 0.4;
 let jumpSuccess = false;
 
 let gameOver = false;
@@ -67,10 +68,10 @@ window.onload = function () {
   // context.fillStyle="green";
   // context.fillRect(dino.x, dino.y, dino.width, dino.height);
 
-  dinoImg = new Image();
-  dinoImg.src = './img/mario_8bit.png';
-  dinoImg.onload = function () {
-    context.drawImage(dinoImg, dino.x, dino.y, dino.width, dino.height);
+  playerImg = new Image();
+  playerImg.src = './img/mario_8bit.png';
+  playerImg.onload = function () {
+    context.drawImage(playerImg, player.x, player.y, player.width, player.height);
   };
 
   cactus1Img = new Image();
@@ -116,8 +117,8 @@ function update() {
 
   //dino
   velocityY += gravity;
-  dino.y = Math.min(dino.y + velocityY, dinoY); //apply gravity to current dino.y, making sure it doesn't exceed the ground
-  context.drawImage(dinoImg, dino.x, dino.y, dino.width, dino.height);
+  player.y = Math.min(player.y + velocityY, playerY); //apply gravity to current dino.y, making sure it doesn't exceed the ground
+  context.drawImage(playerImg, player.x, player.y, player.width, player.height);
 
   //cactus
   for (let i = 0; i < cactusArray.length; i++) {
@@ -125,11 +126,11 @@ function update() {
     cactus.x += velocityX;
     context.drawImage(cactus.img, cactus.x, cactus.y, cactus.width, cactus.height);
 
-    if (detectCollision(dino, cactus)) {
+    if (detectCollision(player, cactus)) {
       gameOver = true;
-      dinoImg.src = './img/mario_8bit_dead.png';
-      dinoImg.onload = function () {
-        context.drawImage(dinoImg, dino.x, dino.y, dino.width, dino.height);
+      playerImg.src = './img/mario_8bit_dead.png';
+      playerImg.onload = function () {
+        context.drawImage(playerImg, player.x, player.y, player.width, player.height);
       };
     }
   }
@@ -141,22 +142,6 @@ function update() {
 }
 
 // ballを飛び越えたかの判定をしたいよね。。。
-function moveDino(e) {
-  if (gameOver) {
-    return;
-  }
-
-  if ((e.code == 'Space' || e.code == 'ArrowUp') && dino.y == dinoY) {
-    //jump
-    velocityY = -10;
-    if (!gameOver) {
-      score += 10;
-    }
-  } else if (e.code == 'ArrowDown' && dino.y == dinoY) {
-    //duck
-  }
-}
-
 function placeCactus() {
   if (gameOver) {
     return;
@@ -283,7 +268,7 @@ function seeScore() {
   for (let i = 0; i < cactusArray.length; i++) {
     let cactus = cactusArray[i];
     if (!obstacleTable[cactus.id]) {
-      if (isLocatedLeft(dino, cactus)) {
+      if (isLocatedLeft(player, cactus)) {
         score += 10;
         obstacleTable[cactus.id] = true;
       }
@@ -294,7 +279,7 @@ function seeScore() {
 
 // この感じで、jumpを監視するfunctionもあるといいのかもな。。。
 function isJumpAvailable() {
-  if (dino.y === dinoY) {
+  if (player.y === playerY) {
     jumpTicket = 2;
   }
 }
