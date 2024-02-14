@@ -1,7 +1,7 @@
 // スマホのサイズは480 * 800
 //board
 let board;
-let boardWidth = 480;
+let boardWidth = 980;
 let boardHeight = 600;
 let context;
 
@@ -31,7 +31,7 @@ let cactus3Width = 102;
 
 let cactusHeight = 70;
 //最初、サボテンがどの位置で始めるかをここで定義しているのね。
-let cactusX = 480;
+let cactusX = 980;
 let cactusY = boardHeight - cactusHeight;
 
 let cactus1Img;
@@ -87,6 +87,7 @@ window.onload = function () {
   // document.addEventListener('click', jumpDino); // 次、俺のjumpでのscreo更新
   // これ、今の状態だと、無限ジャンプできちゃうね。。。
   document.addEventListener('click', dodgeObstacle);
+  // document.addEventListener('click', dodgeObstacle);
 };
 
 // place cactusがわからんよな。。。
@@ -109,6 +110,7 @@ function update() {
   context.drawImage(dinoImg, dino.x, dino.y, dino.width, dino.height);
 
   //cactus
+  // console.log('arr ->', cactusArray);
   for (let i = 0; i < cactusArray.length; i++) {
     let cactus = cactusArray[i];
     cactus.x += velocityX;
@@ -192,15 +194,22 @@ function detectCollision(a, b) {
 function dodged(a, b) {}
 
 // jumpして避けるみたいな動作を加えようか。。。
+
 function dodgeObstacle() {
   velocityY = -10;
+  let collision = false;
   // if(){} //サボテン一つに対してのぶつかったかぶつからなかったか判定する関数をここで実行していきたい。。。
   console.log('array is this -> ', cactusArray);
   for (let i = 0; i < cactusArray.length; i++) {
     let cactus = cactusArray[i];
-    if (!detectCollision(dino, cactus)) {
-      score += 10;
+    if (detectCollision(dino, cactus)) {
+      collision = true;
+      break;
     }
+  }
+  console.log(collision);
+  if (!collision) {
+    score += 10;
   }
 }
 
@@ -212,3 +221,4 @@ function jumpDino(e) {
 
 // もうさ、シンプルにarrayでもつのやめようかね。その代わり、
 // ballの種類を1 - 4つまでにしてrandom製にするかんじ。そっちの方が実装が楽かも。。。
+console.log('arr', cactusArray);
