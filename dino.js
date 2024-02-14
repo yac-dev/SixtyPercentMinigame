@@ -35,7 +35,7 @@ let cactus1Width = 80;
 let cactus2Width = 160;
 let cactus3Width = 102;
 
-let cactusHeight = 70;
+let cactusHeight = 90;
 //最初、サボテンがどの位置で始めるかをここで定義しているのね。
 let cactusX = 980;
 let cactusY = boardHeight - cactusHeight;
@@ -47,7 +47,7 @@ let cactus3Img;
 //physics
 let velocityX = -8; //cactus moving left speed // これを
 let velocityY = 0;
-let gravity = 0.4;
+let gravity = 0.3;
 let jumpSuccess = false;
 
 let gameOver = false;
@@ -74,7 +74,7 @@ window.onload = function () {
   };
 
   cactus1Img = new Image();
-  cactus1Img.src = './img/Basketball.png';
+  cactus1Img.src = './img/peach.png';
 
   cactus2Img = new Image();
   cactus2Img.src = './img/cactus2.png';
