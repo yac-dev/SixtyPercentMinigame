@@ -1,12 +1,11 @@
 // スマホのサイズは480 * 800
-//board
+//　画面のサイズ
 let board;
 let boardWidth = 980;
 let boardHeight = 600;
 let context;
 
-// dinoの変数から直していこうか。。。
-//dino
+// player objectをここで作る。
 let playerWidth = 88;
 let playerHeight = 94;
 let playerX = 20;
@@ -23,10 +22,10 @@ let player = {
 };
 
 //cactus
-let cactusArray = [];
-let cactusId = 1;
+let obstacles = [];
+let obstacleId = 1;
 
-const obstacleTable = {};
+const obstaclesTable = {};
 
 let jumpTicket = 2;
 // 地面についていたら、つまり初期のdinoYの一にいる場合は常にjumpTicketが2の状態になる感じ。一回jumpするごとにtikcetを切る。
@@ -121,12 +120,12 @@ function update() {
   context.drawImage(playerImg, player.x, player.y, player.width, player.height);
 
   //cactus
-  for (let i = 0; i < cactusArray.length; i++) {
-    let cactus = cactusArray[i];
-    cactus.x += velocityX;
-    context.drawImage(cactus.img, cactus.x, cactus.y, cactus.width, cactus.height);
+  for (let i = 0; i < obstacles.length; i++) {
+    let obstacle = obstacles[i];
+    obstacle.x += velocityX;
+    context.drawImage(obstacle.img, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
 
-    if (detectCollision(player, cactus)) {
+    if (detectCollision(player, obstacle)) {
       gameOver = true;
       playerImg.src = './img/mario_8bit_dead.png';
       playerImg.onload = function () {
@@ -149,7 +148,7 @@ function placeCactus() {
 
   //place cactus
   let cactus = {
-    id: cactusId,
+    id: obstacleId,
     img: null,
     x: cactusX,
     y: cactusY,
@@ -157,7 +156,7 @@ function placeCactus() {
     height: cactusHeight,
     isDodged: false,
   };
-  cactusId += 1;
+  obstacleId += 1;
 
   //ここはそんな気にしなくてよくて、、、
   let placeCactusChance = Math.random(); // 0 - 0.9999...
@@ -166,14 +165,14 @@ function placeCactus() {
     // 50% you get cactus1
     cactus.img = cactus1Img;
     cactus.width = cactus1Width;
-    cactusArray.push(cactus);
+    obstacles.push(cactus);
   }
 
   // ここのcactus arrayがよくわからないんだよな。。。
   // console.log('cactuses -> ', cactusArray);
   // memoryめちゃくちゃ食うし、そのために減らしているんだね。
-  if (cactusArray.length > 5) {
-    cactusArray.shift(); //remove the first element from the array so that the array doesn't constantly grow
+  if (obstacles.length > 5) {
+    obstacles.shift(); //remove the first element from the array so that the array doesn't constantly grow
   }
 }
 
@@ -212,9 +211,8 @@ function dodgeObstacle() {
   // if(){} //サボテン一つに対してのぶつかったかぶつからなかったか判定する関数をここで実行していきたい。。。
   // console.log('array is this -> ', cactusArray);
   // つまりだ、、、古くて左にすでに流れているものに関してもjumpをやっちゃっているよね。。。つまり、自分よりすでに左にあるものに関しては何もやらなくていんじゃね？？？？そうだよな。。
-  for (let i = 0; i < cactusArray.length; i++) {
+  for (let i = 0; i < obstacles.length; i++) {
     // 毎回のjumpの度に自分より左にあるものを消すのか。。。。どうやろうか・・・
-    let cactus = cactusArray[i];
     // if (isLocatedLeft(dino, cactus)) {
     //   cactusArray.splice(i, 1);
     //   console.log('after splice', cactusArray);
@@ -244,7 +242,6 @@ function jumpDino(e) {
 
 // もうさ、シンプルにarrayでもつのやめようかね。その代わり、
 // ballの種類を1 - 4つまでにしてrandom製にするかんじ。そっちの方が実装が楽かも。。。
-console.log('arr', cactusArray);
 
 // これで、飛び越えたかの判定をする。
 function detectCollisionVer2() {
@@ -265,12 +262,12 @@ function isLocatedLeft(a, b) {
 // それとはまた別で
 // arrayの状態を見るやつをまた別で置いておけばいいのか。。。
 function seeScore() {
-  for (let i = 0; i < cactusArray.length; i++) {
-    let cactus = cactusArray[i];
-    if (!obstacleTable[cactus.id]) {
+  for (let i = 0; i < obstacles.length; i++) {
+    let cactus = obstacles[i];
+    if (!obstaclesTable[cactus.id]) {
       if (isLocatedLeft(player, cactus)) {
         score += 10;
-        obstacleTable[cactus.id] = true;
+        obstaclesTable[cactus.id] = true;
       }
     } else {
     }
