@@ -2,14 +2,14 @@
 // スマホのサイズは480 * 800
 //　画面のサイズ
 let board;
-let boardWidth = 980;
+let boardWidth = 400;
 let boardHeight = 600;
 let context;
 
 // player objectをここで作る。
 let playerWidth = 88;
 let playerHeight = 94;
-let playerX = 20;
+let playerX = 0;
 let playerY = boardHeight - playerHeight; // 600 - 94
 let playerImg;
 
@@ -30,23 +30,22 @@ let obstacle2Width = 160;
 let obstacle3Width = 102;
 
 let obstacleHeight = 80;
-let obstacleX = 980;
+let obstacleX = 400;
 let obstacleY = boardHeight - obstacleHeight;
 
 let obstacle1Img;
 let obstacle2Img;
 let obstacle3Img;
 
-//physics
-let velocityX = -8; //cactus moving left speed // これを
-let velocityY = 0;
-let gravity = 0.4;
+let velocityX = -6; // 障害物の速さ（左方向へ動いていく） scoreの値によって変動させていく。
+let velocityY = 0; // playerのジャンプ力。
+let gravity = 0.35; // playerの重力。 0.1とかににすると月面空間を飛んでいるような挙動になる。 これもscoreの値によって変動させていく。
 
 let gameOver = false;
 let score = 0;
 
 let jumpCount = 0;
-const defaultAvailableJumpCount = 2; //jumpCount
+const defaultAvailableJumpCount = 2;
 let jumpRest = defaultAvailableJumpCount;
 
 window.onload = function () {
@@ -54,11 +53,9 @@ window.onload = function () {
   board.height = boardHeight;
   board.width = boardWidth;
 
-  context = board.getContext('2d'); //used for drawing on the board
-
-  //draw initial dinosaur
+  context = board.getContext('2d'); // 画面の描画
   // context.fillStyle="green";
-  // context.fillRect(dino.x, dino.y, dino.width, dino.height);
+  // context.fillRect(player.x, player.y, player.width, player.height);
 
   playerImg = new Image();
   playerImg.src = './img/mario.png';
@@ -76,7 +73,7 @@ window.onload = function () {
   obstacle3Img.src = './img/cactus3.png';
 
   requestAnimationFrame(update);
-  setInterval(generateObstacle, 1000);
+  setInterval(generateObstacle, 1100);
   document.addEventListener('click', dodgeObstacle);
   setInterval(seeScore, 100);
   setInterval(recoverJump, 100);
@@ -109,8 +106,8 @@ function update() {
 
   // scoreの描画
   context.fillStyle = 'black';
-  context.font = '20px courier';
-  context.fillText(`${score}p`, 5, 20);
+  context.font = '80px courier';
+  context.fillText(`${score}p`, 150, 70);
 }
 
 function generateObstacle() {
@@ -139,7 +136,7 @@ function generateObstacle() {
   }
 
   if (obstacles.length > 5) {
-    obstacles.shift(); // 配列は無限に長くならないように、5より大きい場合は最初から削っていく。
+    obstacles.shift(); // 配列は無限に長くならないように、5より大きい場合は最初を削る。
   }
 }
 
@@ -161,7 +158,7 @@ function dodgeObstacle() {
   velocityY = -10;
   jumpRest -= 1;
 }
-// cactus arrayそれぞれに対してclick eventを発生させたい、ただそれだけよね。。
+
 function isLocatedLeft(a, b) {
   return a.x > b.x + b.width;
 }
@@ -173,6 +170,13 @@ function seeScore() {
     if (!obstaclesTable[obstacle.id]) {
       if (isLocatedLeft(player, obstacle)) {
         score += 10;
+        // scoreが100の倍数になるにつれて0.3上げていく、そんで、playerの重力も下げていく方がいいかも。
+        if (score % 100 === 0) {
+          velocityX -= 0.2;
+        }
+        // if (velocityX <= 7) {
+        //   gravity -= 1;
+        // }
         obstaclesTable[obstacle.id] = true;
       }
     } else {
