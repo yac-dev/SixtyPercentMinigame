@@ -1,3 +1,4 @@
+// 大きい障害物、空に浮く障害物
 // スマホのサイズは480 * 800
 //　画面のサイズ
 let board;
@@ -23,16 +24,12 @@ let obstacles = [];
 let obstacleId = 1;
 const obstaclesTable = {};
 
-let jumpTicket = 2;
-// 地面についていたら、つまり初期のdinoYの一にいる場合は常にjumpTicketが2の状態になる感じ。一回jumpするごとにtikcetを切る。
-
-// さぼてんの横の大きさをここで定義している。
+// 障害物の横の大きさをここで定義する。
 let obstacle1Width = 70;
 let obstacle2Width = 160;
 let obstacle3Width = 102;
 
 let obstacleHeight = 80;
-//最初、サボテンがどの位置で始めるかをここで定義しているのね。
 let obstacleX = 980;
 let obstacleY = boardHeight - obstacleHeight;
 
@@ -44,13 +41,13 @@ let obstacle3Img;
 let velocityX = -8; //cactus moving left speed // これを
 let velocityY = 0;
 let gravity = 0.4;
-let jumpSuccess = false;
 
 let gameOver = false;
 let score = 0;
 
 let jumpCount = 0;
-let availableJumpCount = 2; //jumpCount
+const defaultAvailableJumpCount = 2; //jumpCount
+let jumpRest = defaultAvailableJumpCount;
 
 window.onload = function () {
   board = document.getElementById('board');
@@ -64,7 +61,7 @@ window.onload = function () {
   // context.fillRect(dino.x, dino.y, dino.width, dino.height);
 
   playerImg = new Image();
-  playerImg.src = './img/mario_8bit.png';
+  playerImg.src = './img/mario.png';
   playerImg.onload = function () {
     context.drawImage(playerImg, player.x, player.y, player.width, player.height);
   };
@@ -78,30 +75,12 @@ window.onload = function () {
   obstacle3Img = new Image();
   obstacle3Img.src = './img/cactus3.png';
 
-  // まあ、とにかくこの3つはブラウザが開いた瞬間にブラウザで登録されるやつね。
-  // 1. うえから順に、再描画できるタイミングでupdate関数を出す。
-  // 2. 1000秒ごとに障害物をランダムに作る
-  // 3. clickおしたら、dionをジャンプさせる
-  // これら３つのfunctionを登録している。
   requestAnimationFrame(update);
-  setInterval(placeCactus, 1000); //1000 milliseconds = 1 second
-  // 毎1秒ごとにcactusをpushしている、ただそれだけのことよね。そんで、lengthが5以上になったら最初のやつだけ取り除いている、っていうただそれだけよ。
-  // そうだから、arrayの中身は最初と全く変わるものになるっていうんだわな。。。どんどん古いものは捨てられていくってうことね。
-  // document.addEventListener('keydown', moveDino); // 最初のコード
-  // document.addEventListener('click', jumpDino); // 次、俺のjumpでのscreo更新
-  // これ、今の状態だと、無限ジャンプできちゃうね。。。
+  setInterval(generateObstacle, 1000);
   document.addEventListener('click', dodgeObstacle);
   setInterval(seeScore, 100);
-  setInterval(isJumpAvailable, 100);
-  // document.addEventListener('click', dodgeObstacle);
+  setInterval(recoverJump, 100);
 };
-
-// place cactusがわからんよな。。。
-// 1000秒ごとに
-
-// scoreの更新は、障害物をうまく避けたらっていうロジックだが、、、
-// これrecursion的な感じなのね。。。
-// これで、毎回毎回再描画する感じ。
 
 function update() {
   requestAnimationFrame(update);
@@ -110,12 +89,10 @@ function update() {
   }
   context.clearRect(0, 0, board.width, board.height);
 
-  //dino
   velocityY += gravity;
-  player.y = Math.min(player.y + velocityY, playerY); //apply gravity to current dino.y, making sure it doesn't exceed the ground
+  player.y = Math.min(player.y + velocityY, playerY);
   context.drawImage(playerImg, player.x, player.y, player.width, player.height);
 
-  //cactus
   for (let i = 0; i < obstacles.length; i++) {
     let obstacle = obstacles[i];
     obstacle.x += velocityX;
@@ -123,27 +100,25 @@ function update() {
 
     if (detectCollision(player, obstacle)) {
       gameOver = true;
-      playerImg.src = './img/mario_8bit_dead.png';
+      playerImg.src = './img/mario_dead.png';
       playerImg.onload = function () {
         context.drawImage(playerImg, player.x, player.y, player.width, player.height);
       };
     }
   }
 
-  //score
+  // scoreの描画
   context.fillStyle = 'black';
   context.font = '20px courier';
   context.fillText(`${score}p`, 5, 20);
 }
 
-// ballを飛び越えたかの判定をしたいよね。。。
-function placeCactus() {
+function generateObstacle() {
   if (gameOver) {
     return;
   }
 
-  //place cactus
-  let obstacle = {
+  const obstacle = {
     id: obstacleId,
     img: null,
     x: obstacleX,
@@ -154,109 +129,44 @@ function placeCactus() {
   };
   obstacleId += 1;
 
-  //ここはそんな気にしなくてよくて、、、
-  let placeCactusChance = Math.random(); // 0 - 0.9999...
+  // obstacleの種類は全部で3つ。1体、2体連結, 3体連結
+  let obstacleChance = Math.random(); // 0 - 0.9999...
 
-  if (placeCactusChance > 0.5) {
-    // 50% you get cactus1
+  if (obstacleChance > 0.5) {
     obstacle.img = obstacle1Img;
     obstacle.width = obstacle1Width;
     obstacles.push(obstacle);
   }
 
-  // ここのcactus arrayがよくわからないんだよな。。。
-  // console.log('cactuses -> ', cactusArray);
-  // memoryめちゃくちゃ食うし、そのために減らしているんだね。
   if (obstacles.length > 5) {
-    obstacles.shift(); //remove the first element from the array so that the array doesn't constantly grow
+    obstacles.shift(); // 配列は無限に長くならないように、5より大きい場合は最初から削っていく。
   }
 }
 
-// 要はぶつかったかどうかの判定をするコード。ぶつかっている状態ならgame overにするっていうロジック。
+// aとbがぶつかったかを判定する役。ぶつかっていたらtrueを返す。基本的に、playerとobstacleに使うことになる。
 function detectCollision(a, b) {
+  // 以下4条件を全部満たしている場合は、trueを返し部使っている判定をする。
   return (
-    a.x < b.x + b.width && // a's top left corner doesn't reach b's top right corner
-    a.x + a.width > b.x && // a's top right corner passes b's top left corner
-    a.y < b.y + b.height && // a's top left corner doesn't reach b's bottom left corner
-    a.y + a.height > b.y
-  ); // a's bottom left corner passes b's top left corner
-}
-
-function detectCollision(a, b) {
-  if (a.x < b.x + b.width && a.x + a.width > b.x && a.y < b.y + b.height && a.y + a.height > b.y) {
-    // ぶつかっています！！
-    return true;
-  } else {
-    if (!b.isDodged) {
-    }
-  }
-}
-
-// -----以下の俺のコード
-function dodged(a, b) {}
-
-// jumpして避けるみたいな動作を加えようか。。。
-
-// jumpをしてobstacleを飛び越えたみたいな関数をどうしよう。。。
-function dodgeObstacle() {
-  if (jumpTicket === 0) {
-    return;
-  }
-  velocityY = -10;
-  let collision = false;
-  // if(){} //サボテン一つに対してのぶつかったかぶつからなかったか判定する関数をここで実行していきたい。。。
-  // console.log('array is this -> ', cactusArray);
-  // つまりだ、、、古くて左にすでに流れているものに関してもjumpをやっちゃっているよね。。。つまり、自分よりすでに左にあるものに関しては何もやらなくていんじゃね？？？？そうだよな。。
-  for (let i = 0; i < obstacles.length; i++) {
-    // 毎回のjumpの度に自分より左にあるものを消すのか。。。。どうやろうか・・・
-    // if (isLocatedLeft(dino, cactus)) {
-    //   cactusArray.splice(i, 1);
-    //   console.log('after splice', cactusArray);
-    // }
-    // if(detectCollisionVer2(dino, cactus)){
-    //   console.log('logging')
-    // }
-  }
-  jumpTicket -= 1;
-
-  console.log('jump rest', jumpTicket);
-  if (!jumpTicket) {
-    return;
-  } else {
-  }
-  // console.log(collision);
-  // if (!collision) {
-  //   score += 10;
-  // }
-}
-
-// 障害物を避けたっていう判定が必要なんだよね。ここをどうするかなんだが、、、、
-function jumpDino(e) {
-  velocityY = -10;
-  score += 10;
-}
-
-// もうさ、シンプルにarrayでもつのやめようかね。その代わり、
-// ballの種類を1 - 4つまでにしてrandom製にするかんじ。そっちの方が実装が楽かも。。。
-
-// これで、飛び越えたかの判定をする。
-function detectCollisionVer2() {
-  return (
-    a.x > b.x + b.width && //a's top left corner doesn't reach b's top right corner
-    a.x + a.width < b.x && //a's top right corner passes b's top left corner
-    a.y > b.y + b.height && //a's top left corner doesn't reach b's bottom left corner
-    a.y + a.height < b.y
+    a.x < b.x + b.width && // aの左上がbの右上に達していないこと
+    a.x + a.width > b.x && // aの右上がbの左上を通り過ぎていること
+    a.y < b.y + b.height && // aの左上がbの左下に達していないこと
+    a.y + a.height > b.y // aの左下がbの左上を通っていること
   );
 }
 
+function dodgeObstacle() {
+  if (jumpRest === 0) {
+    return;
+  }
+  velocityY = -10;
+  jumpRest -= 1;
+}
 // cactus arrayそれぞれに対してclick eventを発生させたい、ただそれだけよね。。
 function isLocatedLeft(a, b) {
   return a.x > b.x + b.width;
 }
 
-// それより、arrayじゃなくてもう普通のobjectでいんじゃないかな。。。
-// それとはまた別で
-// arrayの状態を見るやつをまた別で置いておけばいいのか。。。
+// obstacleが通ったかを監視する役
 function seeScore() {
   for (let i = 0; i < obstacles.length; i++) {
     let obstacle = obstacles[i];
@@ -270,9 +180,9 @@ function seeScore() {
   }
 }
 
-// この感じで、jumpを監視するfunctionもあるといいのかもな。。。
-function isJumpAvailable() {
+// playerが地面に着いたら, jumpできる回数を回復させる
+function recoverJump() {
   if (player.y === playerY) {
-    jumpTicket = 2;
+    jumpRest = 2;
   }
 }
