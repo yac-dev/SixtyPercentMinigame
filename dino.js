@@ -12,8 +12,6 @@ let playerX = 20;
 let playerY = boardHeight - playerHeight; // 600 - 94
 let playerImg;
 
-// dinoのobjectをここで作っているのね。
-// 実際に、今dinoがどこにいるかの情報をここで持っている。
 let player = {
   x: playerX,
   y: playerY,
@@ -21,28 +19,26 @@ let player = {
   height: playerHeight,
 };
 
-//cactus
 let obstacles = [];
 let obstacleId = 1;
-
 const obstaclesTable = {};
 
 let jumpTicket = 2;
 // 地面についていたら、つまり初期のdinoYの一にいる場合は常にjumpTicketが2の状態になる感じ。一回jumpするごとにtikcetを切る。
 
 // さぼてんの横の大きさをここで定義している。
-let cactus1Width = 70;
-let cactus2Width = 160;
-let cactus3Width = 102;
+let obstacle1Width = 70;
+let obstacle2Width = 160;
+let obstacle3Width = 102;
 
-let cactusHeight = 80;
+let obstacleHeight = 80;
 //最初、サボテンがどの位置で始めるかをここで定義しているのね。
-let cactusX = 980;
-let cactusY = boardHeight - cactusHeight;
+let obstacleX = 980;
+let obstacleY = boardHeight - obstacleHeight;
 
-let cactus1Img;
-let cactus2Img;
-let cactus3Img;
+let obstacle1Img;
+let obstacle2Img;
+let obstacle3Img;
 
 //physics
 let velocityX = -8; //cactus moving left speed // これを
@@ -73,14 +69,14 @@ window.onload = function () {
     context.drawImage(playerImg, player.x, player.y, player.width, player.height);
   };
 
-  cactus1Img = new Image();
-  cactus1Img.src = './img/peach.png';
+  obstacle1Img = new Image();
+  obstacle1Img.src = './img/peach.png';
 
-  cactus2Img = new Image();
-  cactus2Img.src = './img/cactus2.png';
+  obstacle2Img = new Image();
+  obstacle2Img.src = './img/cactus2.png';
 
-  cactus3Img = new Image();
-  cactus3Img.src = './img/cactus3.png';
+  obstacle3Img = new Image();
+  obstacle3Img.src = './img/cactus3.png';
 
   // まあ、とにかくこの3つはブラウザが開いた瞬間にブラウザで登録されるやつね。
   // 1. うえから順に、再描画できるタイミングでupdate関数を出す。
@@ -147,13 +143,13 @@ function placeCactus() {
   }
 
   //place cactus
-  let cactus = {
+  let obstacle = {
     id: obstacleId,
     img: null,
-    x: cactusX,
-    y: cactusY,
+    x: obstacleX,
+    y: obstacleY,
     width: null,
-    height: cactusHeight,
+    height: obstacleHeight,
     isDodged: false,
   };
   obstacleId += 1;
@@ -163,9 +159,9 @@ function placeCactus() {
 
   if (placeCactusChance > 0.5) {
     // 50% you get cactus1
-    cactus.img = cactus1Img;
-    cactus.width = cactus1Width;
-    obstacles.push(cactus);
+    obstacle.img = obstacle1Img;
+    obstacle.width = obstacle1Width;
+    obstacles.push(obstacle);
   }
 
   // ここのcactus arrayがよくわからないんだよな。。。
@@ -263,11 +259,11 @@ function isLocatedLeft(a, b) {
 // arrayの状態を見るやつをまた別で置いておけばいいのか。。。
 function seeScore() {
   for (let i = 0; i < obstacles.length; i++) {
-    let cactus = obstacles[i];
-    if (!obstaclesTable[cactus.id]) {
-      if (isLocatedLeft(player, cactus)) {
+    let obstacle = obstacles[i];
+    if (!obstaclesTable[obstacle.id]) {
+      if (isLocatedLeft(player, obstacle)) {
         score += 10;
-        obstaclesTable[cactus.id] = true;
+        obstaclesTable[obstacle.id] = true;
       }
     } else {
     }
