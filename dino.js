@@ -1,6 +1,11 @@
+// 改めてcode見直そう。とりあえず、まずはgame overの時用のクマ画像。
+// game overのときだけ60 deadにしたいが、、、前の60が残っている問題。。。
+
 // 大きい障害物、空に浮く障害物
 // スマホのサイズは480 * 800
 //　画面のサイズ
+// あとは、ballを回転させる。
+
 let board;
 let boardWidth = 400;
 let boardHeight = 600;
@@ -25,7 +30,7 @@ let obstacleId = 1;
 const obstaclesTable = {};
 
 // 障害物の横の大きさをここで定義する。
-let obstacle1Width = 70;
+let obstacle1Width = 80;
 let obstacle2Width = 160;
 let obstacle3Width = 102;
 
@@ -58,13 +63,13 @@ window.onload = function () {
   // context.fillRect(player.x, player.y, player.width, player.height);
 
   playerImg = new Image();
-  playerImg.src = './img/mario.png';
+  playerImg.src = './img/60.png';
   playerImg.onload = function () {
     context.drawImage(playerImg, player.x, player.y, player.width, player.height);
   };
 
   obstacle1Img = new Image();
-  obstacle1Img.src = './img/peach.png';
+  obstacle1Img.src = './img/Basketball.png';
 
   obstacle2Img = new Image();
   obstacle2Img.src = './img/cactus2.png';
@@ -97,7 +102,7 @@ function update() {
 
     if (detectCollision(player, obstacle)) {
       gameOver = true;
-      playerImg.src = './img/mario_dead.png';
+      playerImg.src = './img/60_dead.png';
       playerImg.onload = function () {
         context.drawImage(playerImg, player.x, player.y, player.width, player.height);
       };
