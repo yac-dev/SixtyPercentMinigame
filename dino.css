@@ -4,7 +4,7 @@ body {
 }
 
 #board {
-  background-image: url(./img/mario_bg_ver2.jpg);
+  background-image: url(./img/background.png);
   background-color: lightgray;
   border-bottom: 1px solid black;
 }

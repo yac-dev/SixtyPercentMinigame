@@ -31,12 +31,14 @@ const obstaclesTable = {};
 
 // 障害物の横の大きさをここで定義する。
 let obstacle1Width = 80;
-let obstacle2Width = 160;
+let obstacle2Width = 140;
 let obstacle3Width = 102;
 
 let obstacleHeight = 80;
+let obstacle2Height = 140;
 let obstacleX = 400;
-let obstacleY = boardHeight - obstacleHeight;
+// let obstacleY = boardHeight - obstacleHeight;
+// obstacleYかなあとは、、、
 
 let obstacle1Img;
 let obstacle2Img;
@@ -69,10 +71,10 @@ window.onload = function () {
   };
 
   obstacle1Img = new Image();
-  obstacle1Img.src = './img/Basketball.png';
+  obstacle1Img.src = './img/ball_obstacle.png';
 
   obstacle2Img = new Image();
-  obstacle2Img.src = './img/cactus2.png';
+  obstacle2Img.src = './img/ball_obstacle.png';
 
   obstacle3Img = new Image();
   obstacle3Img.src = './img/cactus3.png';
@@ -98,19 +100,23 @@ function update() {
   for (let i = 0; i < obstacles.length; i++) {
     let obstacle = obstacles[i];
     obstacle.x += velocityX;
+    // 以下でballを回転させるアニメーションを加える
     context.save();
     context.translate(obstacle.x + obstacle.width / 2, obstacle.y + obstacle.height / 2);
     context.rotate((obstacle.rotationAngle * Math.PI) / 180);
     context.drawImage(obstacle.img, -obstacle.width / 2, -obstacle.height / 2, obstacle.width, obstacle.height);
     context.restore();
 
-    obstacle.rotationAngle -= 2;
+    // decrementだと反時計回りに、incrementだと時計回りになる。
+    obstacle.rotationAngle += 6;
 
     if (detectCollision(player, obstacle)) {
       gameOver = true;
       playerImg.src = './img/60_dead.png';
       playerImg.onload = function () {
-        context.drawImage(playerImg, player.x, player.y, player.width, player.height);
+        // context.drawImage(playerImg, player.x, player.y, player.width, player.height);
+        context.clearRect(player.x, player.y, player.width, player.height); // Clear previous player image
+        context.drawImage(playerImg, player.x, player.y, 200, 100);
       };
     }
   }
@@ -130,9 +136,9 @@ function generateObstacle() {
     id: obstacleId,
     img: null,
     x: obstacleX,
-    y: obstacleY,
+    y: null,
     width: null,
-    height: obstacleHeight,
+    height: null,
     isDodged: false,
   };
   obstacleId += 1;
@@ -140,12 +146,37 @@ function generateObstacle() {
   // obstacleの種類は全部で3つ。1体、2体連結, 3体連結
   let obstacleChance = Math.random(); // 0 - 0.9999...
 
-  if (obstacleChance > 0.5) {
-    obstacle.img = obstacle1Img;
-    obstacle.width = obstacle1Width;
-    obstacle.rotationAngle = 0;
-    obstacles.push(obstacle);
-  }
+  obstacle.img = obstacle1Img;
+  obstacle.width = obstacle1Width;
+  obstacle.height = obstacleHeight;
+  obstacle.y = boardHeight - obstacleHeight;
+  obstacle.rotationAngle = 0;
+  obstacles.push(obstacle);
+
+  // if (obstacleChance > 0.7) {
+  //   obstacle.img = obstacle1Img;
+  //   obstacle.width = obstacle1Width;
+  //   obstacle.height = obstacleHeight;
+  //   obstacle.y = boardHeight - obstacleHeight;
+  //   obstacle.rotationAngle = 0;
+  //   obstacles.push(obstacle);
+  // }
+
+  // if (obstacleChance < 0.2) {
+  //   obstacle.img = obstacle2Img;
+  //   obstacle.width = obstacle2Width;
+  //   obstacle.height = obstacle2Height;
+  //   obstacle.y = boardHeight - obstacle2Height;
+  //   obstacle.rotationAngle = 0;
+  //   obstacles.push(obstacle);
+  // }
+
+  // if (obstacleChance > 0.3) {
+  // obstacle.img = obstacle1Img;
+  // obstacle.width = obstacle1Width;
+  // obstacle.rotationAngle = 0;
+  // obstacles.push(obstacle);
+  // }
 
   if (obstacles.length > 5) {
     obstacles.shift(); // 配列は無限に長くならないように、5より大きい場合は最初を削る。
