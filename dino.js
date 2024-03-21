@@ -98,7 +98,13 @@ function update() {
   for (let i = 0; i < obstacles.length; i++) {
     let obstacle = obstacles[i];
     obstacle.x += velocityX;
-    context.drawImage(obstacle.img, obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+    context.save();
+    context.translate(obstacle.x + obstacle.width / 2, obstacle.y + obstacle.height / 2);
+    context.rotate((obstacle.rotationAngle * Math.PI) / 180);
+    context.drawImage(obstacle.img, -obstacle.width / 2, -obstacle.height / 2, obstacle.width, obstacle.height);
+    context.restore();
+
+    obstacle.rotationAngle -= 2;
 
     if (detectCollision(player, obstacle)) {
       gameOver = true;
@@ -137,6 +143,7 @@ function generateObstacle() {
   if (obstacleChance > 0.5) {
     obstacle.img = obstacle1Img;
     obstacle.width = obstacle1Width;
+    obstacle.rotationAngle = 0;
     obstacles.push(obstacle);
   }
 
