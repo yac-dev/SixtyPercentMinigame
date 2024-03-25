@@ -22,7 +22,7 @@ let obstacleId = 1;
 const obstaclesTable = {};
 
 // 障害物の横の大きさをここで定義する。
-let obstacle1Width = 80;
+let obstacle1Width = 55;
 let obstacle2Width = 140;
 let obstacle3Width = 102;
 
