@@ -1,14 +1,6 @@
-// 改めてcode見直そう。とりあえず、まずはgame overの時用のクマ画像。
-// game overのときだけ60 deadにしたいが、、、前の60が残っている問題。。。
-
-// 大きい障害物、空に浮く障害物
-// スマホのサイズは480 * 800
-//　画面のサイズ
-// あとは、ballを回転させる。
-
 let board;
 let boardWidth = 400;
-let boardHeight = 600;
+let boardHeight = 711;
 let context;
 
 // player objectをここで作る。
@@ -34,7 +26,7 @@ let obstacle1Width = 80;
 let obstacle2Width = 140;
 let obstacle3Width = 102;
 
-let obstacleHeight = 80;
+let obstacleHeight = 55; // おおよそろくおの頭の大きさくらいに設定
 let obstacle2Height = 140;
 let obstacleX = 400;
 // let obstacleY = boardHeight - obstacleHeight;
@@ -44,7 +36,7 @@ let obstacle1Img;
 let obstacle2Img;
 let obstacle3Img;
 
-let velocityX = -6; // 障害物の速さ（左方向へ動いていく） scoreの値によって変動させていく。
+// let velocityX = -6; // 障害物の速さ（左方向へ動いていく） scoreの値によって変動させていく。
 let velocityY = 0; // playerのジャンプ力。
 let gravity = 0.35; // playerの重力。 0.1とかににすると月面空間を飛んでいるような挙動になる。 これもscoreの値によって変動させていく。
 
@@ -65,19 +57,16 @@ window.onload = function () {
   // context.fillRect(player.x, player.y, player.width, player.height);
 
   playerImg = new Image();
-  playerImg.src = './img/60.png';
+  playerImg.src = 'https://cdn.shopify.com/s/files/1/0066/0360/4086/files/60__minigame_1.png?v=1711333289';
   playerImg.onload = function () {
     context.drawImage(playerImg, player.x, player.y, player.width, player.height);
   };
 
   obstacle1Img = new Image();
-  obstacle1Img.src = './img/ball_obstacle.png';
+  obstacle1Img.src = 'https://cdn.shopify.com/s/files/1/0066/0360/4086/files/60__minigame_3.png?v=1711333288';
 
   obstacle2Img = new Image();
-  obstacle2Img.src = './img/ball_obstacle.png';
-
-  obstacle3Img = new Image();
-  obstacle3Img.src = './img/cactus3.png';
+  obstacle2Img.src = './Images/ball.png';
 
   requestAnimationFrame(update);
   setInterval(generateObstacle, 1100);
@@ -99,7 +88,7 @@ function update() {
 
   for (let i = 0; i < obstacles.length; i++) {
     let obstacle = obstacles[i];
-    obstacle.x += velocityX;
+    obstacle.x += obstacle.velocityX;
     // 以下でballを回転させるアニメーションを加える
     context.save();
     context.translate(obstacle.x + obstacle.width / 2, obstacle.y + obstacle.height / 2);
@@ -108,11 +97,11 @@ function update() {
     context.restore();
 
     // decrementだと反時計回りに、incrementだと時計回りになる。
-    obstacle.rotationAngle += 6;
+    obstacle.rotationAngle -= 6;
 
     if (detectCollision(player, obstacle)) {
       gameOver = true;
-      playerImg.src = './img/60_dead.png';
+      playerImg.src = 'https://cdn.shopify.com/s/files/1/0066/0360/4086/files/60__minigame_2-2.png?v=1711333288';
       playerImg.onload = function () {
         // context.drawImage(playerImg, player.x, player.y, player.width, player.height);
         context.clearRect(player.x, player.y, player.width, player.height); // Clear previous player image
@@ -140,43 +129,52 @@ function generateObstacle() {
     width: null,
     height: null,
     isDodged: false,
+    velocityX: -6,
   };
   obstacleId += 1;
 
   // obstacleの種類は全部で3つ。1体、2体連結, 3体連結
   let obstacleChance = Math.random(); // 0 - 0.9999...
+  if (obstacleChance > 0.6) {
+    obstacle.img = obstacle1Img;
+    obstacle.width = obstacle1Width;
+    obstacle.height = obstacleHeight;
+    obstacle.y = boardHeight - obstacleHeight;
+    obstacle.rotationAngle = 0;
+    obstacles.push(obstacle);
+  }
 
-  obstacle.img = obstacle1Img;
-  obstacle.width = obstacle1Width;
-  obstacle.height = obstacleHeight;
-  obstacle.y = boardHeight - obstacleHeight;
-  obstacle.rotationAngle = 0;
-  obstacles.push(obstacle);
-
-  // if (obstacleChance > 0.7) {
+  // if (obstacleChance < 0.4 && obstacleChance >= 0.1) {
   //   obstacle.img = obstacle1Img;
   //   obstacle.width = obstacle1Width;
   //   obstacle.height = obstacleHeight;
   //   obstacle.y = boardHeight - obstacleHeight;
+  //   obstacle.velocityX = -8;
   //   obstacle.rotationAngle = 0;
   //   obstacles.push(obstacle);
   // }
 
-  // if (obstacleChance < 0.2) {
-  //   obstacle.img = obstacle2Img;
-  //   obstacle.width = obstacle2Width;
-  //   obstacle.height = obstacle2Height;
-  //   obstacle.y = boardHeight - obstacle2Height;
-  //   obstacle.rotationAngle = 0;
-  //   obstacles.push(obstacle);
-  // }
-
-  // if (obstacleChance > 0.3) {
-  // obstacle.img = obstacle1Img;
-  // obstacle.width = obstacle1Width;
-  // obstacle.rotationAngle = 0;
-  // obstacles.push(obstacle);
-  // }
+  // 一割の確率で、障害物のスピードに緩急をつける。(少し遅いものと早いもの)
+  if (obstacleChance < 0.1) {
+    let which = Math.random();
+    if (which > 0.5) {
+      obstacle.img = obstacle1Img;
+      obstacle.width = obstacle1Width;
+      obstacle.height = obstacleHeight;
+      obstacle.y = boardHeight - obstacleHeight;
+      obstacle.velocityX = -4;
+      obstacle.rotationAngle = -2;
+      obstacles.push(obstacle);
+    } else {
+      obstacle.img = obstacle1Img;
+      obstacle.width = obstacle1Width;
+      obstacle.height = obstacleHeight;
+      obstacle.y = boardHeight - obstacleHeight;
+      obstacle.velocityX = -8;
+      obstacle.rotationAngle = 5;
+      obstacles.push(obstacle);
+    }
+  }
 
   if (obstacles.length > 5) {
     obstacles.shift(); // 配列は無限に長くならないように、5より大きい場合は最初を削る。
@@ -188,9 +186,9 @@ function detectCollision(a, b) {
   // 以下4条件を全部満たしている場合は、trueを返し部使っている判定をする。
   return (
     a.x < b.x + b.width && // aの左上がbの右上に達していないこと
-    a.x + a.width > b.x && // aの右上がbの左上を通り過ぎていること
+    a.x + a.width - 15 > b.x && // aの右上がbの左上を通り過ぎていること
     a.y < b.y + b.height && // aの左上がbの左下に達していないこと
-    a.y + a.height > b.y // aの左下がbの左上を通っていること
+    a.y + a.height - 15 > b.y // aの左下がbの左上を通っていること
   );
 }
 
@@ -233,3 +231,5 @@ function recoverJump() {
     jumpRest = 2;
   }
 }
+
+// function getResult(){}
