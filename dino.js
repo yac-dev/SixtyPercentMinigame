@@ -1,6 +1,6 @@
 let board;
 let boardWidth = 400;
-let boardHeight = 600;
+let boardHeight = 550;
 let context;
 
 // player objectをここで作る。
