@@ -6,5 +6,6 @@ body {
 #board {
   background-image: url(./img/background.png);
   background-color: lightgray;
+  background-size: cover;
   border-bottom: 1px solid black;
 }
